@@ -8,7 +8,7 @@ import java.util.Scanner;
 /**
  * @author Sergei Sosnilo
  */
-//TODO: add undo move method, counter of taken pieces (Piece.Value)
+// TODO: add undo move method, counter of taken pieces (Piece.Value)
 public class ChessLogic {
     public void start() {
         Scanner sc = new Scanner(System.in);
