@@ -11,10 +11,6 @@ public class ChessGame {
         chessLogicStart.start();
     }
 
-    public void getPause() {
-
-    }
-
     public void getEnd() {
 
     }
