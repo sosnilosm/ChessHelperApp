@@ -4,7 +4,6 @@ import com.sosnilosm.chess.pieces.AbstractPiece;
 import com.sosnilosm.chess.pieces.Move;
 import com.sosnilosm.chess.pieces.Piece;
 import com.sosnilosm.chess.pieces.definite.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -27,8 +26,8 @@ public class ChessBoard {
     private final AbstractPiece[][] board;
     private Piece.Colour currentTurn = Piece.Colour.White;
 
-    private final Stack<MovesStkData> previousMovesStk = new Stack<>();
-    private final Stack<MovesStkData> nextMovesStk = new Stack<>();
+    private final Stack<PosStkData> previousPosStk = new Stack<>();
+    private final Stack<PosStkData> nextPosStk = new Stack<>();
 
     public ChessBoard() {
         board = new AbstractPiece[8][8];
@@ -98,30 +97,29 @@ public class ChessBoard {
         return true;
     }
 
-    // TODO: rework and fix nextMove(); find solution for clearing nextMovesStk, after doing new move;
-    public boolean previousMove() {
-        if (!previousMovesStk.empty()) {
-            MovesStkData previousMove = previousMovesStk.pop();
+    public boolean previousPos() {
+        if (!previousPosStk.empty()) {
+            PosStkData previousMove = previousPosStk.pop();
 
             board[previousMove.toY()][previousMove.toX()] = previousMove.toPiece();
             board[previousMove.fromY()][previousMove.fromX()] = previousMove.fromPiece();
 
-            return addMoveInNextStk(previousMove.toX(), previousMove.toY(), previousMove.fromX(), previousMove.fromY(),
-                    previousMove.toPiece(), previousMove.fromPiece());
+            return addPosInNextStk(previousMove.fromX(), previousMove.fromY(), previousMove.toX(), previousMove.toY(),
+                    previousMove.fromPiece(), previousMove.toPiece());
         }
         else {
             return false;
         }
     }
 
-    public boolean nextMove() {
-        if (!nextMovesStk.empty()) {
-            MovesStkData nextMove = nextMovesStk.pop();
+    public boolean nextPos() {
+        if (!nextPosStk.empty()) {
+            PosStkData nextMove = nextPosStk.pop();
 
-            board[nextMove.toY()][nextMove.toX()] = nextMove.toPiece();
-            board[nextMove.fromY()][nextMove.fromX()] = nextMove.fromPiece();
+            board[nextMove.fromY()][nextMove.fromX()] = nextMove.toPiece();
+            board[nextMove.toY()][nextMove.toX()] = nextMove.fromPiece();
 
-            return addMoveInNextStk(nextMove.fromX(), nextMove.fromY(), nextMove.toX(), nextMove.toY(),
+            return addPosInPreviousStk(nextMove.fromX(), nextMove.fromY(), nextMove.toX(), nextMove.toY(),
                     nextMove.fromPiece(), nextMove.toPiece());
         }
         else {
@@ -131,15 +129,15 @@ public class ChessBoard {
 
 
 
-    private boolean addMoveInPreviousStk(int fromX, int fromY, int toX, int toY,
-                                         AbstractPiece fromPiece, AbstractPiece toPiece) {
-        previousMovesStk.push(new MovesStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+    private boolean addPosInPreviousStk(int fromX, int fromY, int toX, int toY,
+                                        AbstractPiece fromPiece, AbstractPiece toPiece) {
+        previousPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
         return swapTurn();
     }
 
-    private boolean addMoveInNextStk(int fromX, int fromY, int toX, int toY,
-                                     AbstractPiece fromPiece, AbstractPiece toPiece) {
-        nextMovesStk.push(new MovesStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+    private boolean addPosInNextStk(int fromX, int fromY, int toX, int toY,
+                                    AbstractPiece fromPiece, AbstractPiece toPiece) {
+        nextPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
         return swapTurn();
     }
 
@@ -157,8 +155,8 @@ public class ChessBoard {
             board[toY][toX].doMove();
             board[fromY][fromX] = new EmptyCell();
 
-            nextMovesStk.clear();
-            return addMoveInPreviousStk(fromX, fromY, toX, toY, fromPiece, toPiece);
+            nextPosStk.clear();
+            return addPosInPreviousStk(fromX, fromY, toX, toY, fromPiece, toPiece);
 
         }
         return false;
@@ -186,7 +184,7 @@ public class ChessBoard {
         return false;
     }
 
-    private @NotNull List<int[]> getLegalMoves(int x, int y) {
+    private List<int[]> getLegalMoves(int x, int y) {
         List<int[]> legalMoves = new ArrayList<>();
         // Empty cell check
         if (!isEmptyCell(x, y)) {
@@ -377,7 +375,7 @@ public class ChessBoard {
         board[fromY][fromX + 2].doMove();
         board[toY][toX - 2].doMove();
 
-        nextMovesStk.clear();
+        nextPosStk.clear();
         return swapTurn();
     }
 
@@ -395,7 +393,7 @@ public class ChessBoard {
         board[fromY][fromX - 2].doMove();
         board[toY][toX + 3].doMove();
 
-        nextMovesStk.clear();
+        nextPosStk.clear();
         return swapTurn();
     }
 

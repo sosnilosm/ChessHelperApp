@@ -78,21 +78,21 @@ public class ChessLogic {
             }
         }
         else if (cmd.matches("undo")) {
-            if (chessBoard.previousMove()) {
-                System.out.println("Undo move");
+            if (chessBoard.previousPos()) {
+                System.out.println("OK");
                 return true;
             }
             else {
-                System.out.println("No moves to be under");
+                System.out.println("<ERROR No moves to be UNDER>");
             }
         }
         else if (cmd.matches("next")) {
-            if (chessBoard.nextMove()) {
-                System.out.println("Next move");
+            if (chessBoard.nextPos()) {
+                System.out.println("OK");
                 return true;
             }
             else {
-                System.out.println("No moves to be next");
+                System.out.println("<ERROR No moves to be NEXT>");
             }
         }
         System.out.println("<INPUT ERROR>");
