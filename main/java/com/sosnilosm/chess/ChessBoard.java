@@ -6,10 +6,7 @@ import com.sosnilosm.chess.pieces.Piece;
 import com.sosnilosm.chess.pieces.definite.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * @author Sergei Sosnilo
@@ -29,6 +26,9 @@ import java.util.Scanner;
 public class ChessBoard {
     private final AbstractPiece[][] board;
     private Piece.Colour currentTurn = Piece.Colour.White;
+
+    private final Stack<MovesStkData> previousMovesStk = new Stack<>();
+    private final Stack<MovesStkData> nextMovesStk = new Stack<>();
 
     public ChessBoard() {
         board = new AbstractPiece[8][8];
@@ -98,8 +98,54 @@ public class ChessBoard {
         return true;
     }
 
+    // TODO: rework and fix nextMove(); find solution for clearing nextMovesStk, after doing new move;
+    public boolean previousMove() {
+        if (!previousMovesStk.empty()) {
+            MovesStkData previousMove = previousMovesStk.pop();
+
+            board[previousMove.toY()][previousMove.toX()] = previousMove.toPiece();
+            board[previousMove.fromY()][previousMove.fromX()] = previousMove.fromPiece();
+
+            return addMoveInNextStk(previousMove.toX(), previousMove.toY(), previousMove.fromX(), previousMove.fromY(),
+                    previousMove.toPiece(), previousMove.fromPiece());
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean nextMove() {
+        if (!nextMovesStk.empty()) {
+            MovesStkData nextMove = nextMovesStk.pop();
+
+            board[nextMove.toY()][nextMove.toX()] = nextMove.toPiece();
+            board[nextMove.fromY()][nextMove.fromX()] = nextMove.fromPiece();
+
+            return addMoveInNextStk(nextMove.fromX(), nextMove.fromY(), nextMove.toX(), nextMove.toY(),
+                    nextMove.fromPiece(), nextMove.toPiece());
+        }
+        else {
+            return false;
+        }
+    }
+
+
+
+    private boolean addMoveInPreviousStk(int fromX, int fromY, int toX, int toY,
+                                         AbstractPiece fromPiece, AbstractPiece toPiece) {
+        previousMovesStk.push(new MovesStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+        return swapTurn();
+    }
+
+    private boolean addMoveInNextStk(int fromX, int fromY, int toX, int toY,
+                                     AbstractPiece fromPiece, AbstractPiece toPiece) {
+        nextMovesStk.push(new MovesStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+        return swapTurn();
+    }
+
     public boolean doMove(int fromX, int fromY, int toX, int toY) {
         if (moveCheckForLegal(fromX, fromY, toX, toY)) {
+            AbstractPiece fromPiece = board[fromY][fromX], toPiece = board[toY][toX];
             if (board[fromY][fromX].getType() == Piece.Types.Pawn
                     && ((toY == 0 && board[fromY][fromX].getColour() == Piece.Colour.Black)
                                     || (toY == 7 && board[fromY][fromX].getColour() == Piece.Colour.White))
@@ -111,7 +157,9 @@ public class ChessBoard {
             board[toY][toX].doMove();
             board[fromY][fromX] = new EmptyCell();
 
-            return swapTurn();
+            nextMovesStk.clear();
+            return addMoveInPreviousStk(fromX, fromY, toX, toY, fromPiece, toPiece);
+
         }
         return false;
     }
@@ -329,6 +377,7 @@ public class ChessBoard {
         board[fromY][fromX + 2].doMove();
         board[toY][toX - 2].doMove();
 
+        nextMovesStk.clear();
         return swapTurn();
     }
 
@@ -346,6 +395,7 @@ public class ChessBoard {
         board[fromY][fromX - 2].doMove();
         board[toY][toX + 3].doMove();
 
+        nextMovesStk.clear();
         return swapTurn();
     }
 

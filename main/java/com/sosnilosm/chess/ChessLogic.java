@@ -8,7 +8,7 @@ import java.util.Scanner;
 /**
  * @author Sergei Sosnilo
  */
-// TODO: add undo move method, counter of taken pieces (Piece.Value)
+// TODO: add counter of taken pieces (Piece.Value)
 public class ChessLogic {
     public void start() {
         Scanner sc = new Scanner(System.in);
@@ -75,6 +75,24 @@ public class ChessLogic {
             else {
                 System.out.println("<ROQUE ERROR>");
                 return false;
+            }
+        }
+        else if (cmd.matches("undo")) {
+            if (chessBoard.previousMove()) {
+                System.out.println("Undo move");
+                return true;
+            }
+            else {
+                System.out.println("No moves to be under");
+            }
+        }
+        else if (cmd.matches("next")) {
+            if (chessBoard.nextMove()) {
+                System.out.println("Next move");
+                return true;
+            }
+            else {
+                System.out.println("No moves to be next");
             }
         }
         System.out.println("<INPUT ERROR>");
