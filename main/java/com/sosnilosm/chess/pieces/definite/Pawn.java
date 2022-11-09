@@ -7,12 +7,12 @@ import com.sosnilosm.chess.pieces.Move;
  * @author Sergei Sosnilo
  */
 public class Pawn extends AbstractPiece {
-    public Pawn(Colour colour) {
+    public Pawn(Colours colours) {
         super(
                 Types.Pawn,
                 1,
-                colour,
-                (colour == Colour.Black)
+                colours,
+                (colours == Colours.Black)
                         ?
                         // if Pawn is White
                         new Move[]{

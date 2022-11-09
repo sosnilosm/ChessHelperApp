@@ -8,6 +8,6 @@ import com.sosnilosm.chess.pieces.Move;
  */
 public class EmptyCell extends AbstractPiece {
     public EmptyCell() {
-        super(Types.empty, 0, Colour.empty, new Move[]{}, false);
+        super(Types.empty, 0, Colours.empty, new Move[]{}, false);
     }
 }

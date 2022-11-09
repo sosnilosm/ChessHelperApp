@@ -13,14 +13,14 @@ public interface Piece {
         Rook,
         empty
     }
-    enum Colour {
+    enum Colours {
         White,
         Black,
         empty
     }
     AbstractPiece.Types getType();
 
-    AbstractPiece.Colour getColour();
+    Colours getColour();
 
     Move[] getValidMoves();
 

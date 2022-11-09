@@ -8,11 +8,12 @@ import java.util.Scanner;
 /**
  * @author Sergei Sosnilo
  */
-// TODO: add counter of taken pieces (Piece.Value)
 public class ChessLogic {
     public void start() {
         Scanner sc = new Scanner(System.in);
         ChessBoard chessBoard = new ChessBoard();
+        System.out.println("White took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.White));
+        System.out.println("Black took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.Black));
         System.out.println(chessBoard);
 
         int movesCounter = 0;
@@ -21,6 +22,14 @@ public class ChessLogic {
             String cmd = sc.nextLine();
 
             if (doMove(cmd, chessBoard)) {
+                System.out.println("White took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.White));
+                if (chessBoard.getSuperiorityOfColour(Piece.Colours.White) > 0) {
+                    System.out.print("+" + chessBoard.getSuperiorityOfColour(Piece.Colours.White));
+                }
+                System.out.println("Black took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.Black));
+                if (chessBoard.getSuperiorityOfColour(Piece.Colours.Black) > 0) {
+                    System.out.print("+" + chessBoard.getSuperiorityOfColour(Piece.Colours.Black));
+                }
                 System.out.println(chessBoard);
                 movesCounter++;
             }
@@ -30,73 +39,95 @@ public class ChessLogic {
             }
         }
         System.out.println("CHECKMATE!");
-        if (chessBoard.getCurrentTurn() == Piece.Colour.White) {
+        if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
             System.out.println("BLACK WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
-        } else if (chessBoard.getCurrentTurn() == Piece.Colour.Black) {
+        } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
             System.out.println("WHITE WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
         }
     }
 
     private boolean doMove(String cmd, ChessBoard chessBoard) {
         if (cmd.matches("[a-hA-H][1-8] [a-hA-ZH][1-8]")) {
-            String fromCmd = cmd.toLowerCase().split(" ")[0];
-            String toCmd = cmd.toLowerCase().split(" ")[1];
-
-            int[] from = getIntXY(fromCmd);
-            int[] to = getIntXY(toCmd);
-            System.out.println("from = " + Arrays.toString(from));
-            System.out.println("to = " + Arrays.toString(to));
-            if (chessBoard.doMove(from[0], from[1], to[0], to[1])) {
-                System.out.println("OK " + cmd);
-                return true;
-            } else {
-                System.out.println("<MOVE ERROR>");
-                return false;
-            }
+            return ordinaryMove(cmd, chessBoard);
         }
         else if (cmd.matches("0-0")) {
-            if (chessBoard.getCurrentTurn() == Piece.Colour.White) {
-                return chessBoard.doRoque(4, 0, 7, 0);
-            } else if (chessBoard.getCurrentTurn() == Piece.Colour.Black) {
-                System.out.println("OK " + cmd);
-                return chessBoard.doRoque(4, 7, 7, 7);
-            }
-            else {
-                System.out.println("<ROQUE ERROR>");
-                return false;
-            }
+            return shortRoque(cmd, chessBoard);
         } else if (cmd.matches("0-0-0")) {
-            if (chessBoard.getCurrentTurn() == Piece.Colour.White) {
-                return chessBoard.doRoque(4, 0, 0, 0);
-            } else if (chessBoard.getCurrentTurn() == Piece.Colour.Black) {
-                System.out.println("OK " + cmd);
-                return chessBoard.doRoque(4, 7, 0, 7);
-            }
-            else {
-                System.out.println("<ROQUE ERROR>");
-                return false;
-            }
+            return longRoque(cmd, chessBoard);
         }
         else if (cmd.matches("undo")) {
-            if (chessBoard.previousPos()) {
-                System.out.println("OK");
-                return true;
-            }
-            else {
-                System.out.println("<ERROR No moves to be UNDER>");
-            }
+            return undoPos(chessBoard);
         }
         else if (cmd.matches("next")) {
-            if (chessBoard.nextPos()) {
-                System.out.println("OK");
-                return true;
-            }
-            else {
-                System.out.println("<ERROR No moves to be NEXT>");
-            }
+            return nextPos(chessBoard);
         }
         System.out.println("<INPUT ERROR>");
         return false;
+    }
+
+    private boolean ordinaryMove(String cmd, ChessBoard chessBoard) {
+        String fromCmd = cmd.toLowerCase().split(" ")[0];
+        String toCmd = cmd.toLowerCase().split(" ")[1];
+
+        int[] from = getIntXY(fromCmd);
+        int[] to = getIntXY(toCmd);
+        System.out.println("from = " + Arrays.toString(from));
+        System.out.println("to = " + Arrays.toString(to));
+        if (chessBoard.doMove(from[0], from[1], to[0], to[1])) {
+            System.out.println("OK " + cmd);
+            return true;
+        } else {
+            System.out.println("<MOVE ERROR>");
+            return false;
+        }
+    }
+
+    private boolean shortRoque(String cmd, ChessBoard chessBoard) {
+        if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
+            return chessBoard.doRoque(4, 0, 7, 0);
+        } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
+            System.out.println("OK " + cmd);
+            return chessBoard.doRoque(4, 7, 7, 7);
+        }
+        else {
+            System.out.println("<ROQUE ERROR>");
+            return false;
+        }
+    }
+
+    private boolean longRoque(String cmd, ChessBoard chessBoard) {
+        if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
+            return chessBoard.doRoque(4, 0, 0, 0);
+        } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
+            System.out.println("OK " + cmd);
+            return chessBoard.doRoque(4, 7, 0, 7);
+        }
+        else {
+            System.out.println("<ROQUE ERROR>");
+            return false;
+        }
+    }
+
+    private boolean undoPos(ChessBoard chessBoard) {
+        if (chessBoard.previousPos()) {
+            System.out.println("OK");
+            return true;
+        }
+        else {
+            System.out.println("<ERROR No moves to be UNDER>");
+            return false;
+        }
+    }
+
+    private boolean nextPos(ChessBoard chessBoard) {
+        if (chessBoard.nextPos()) {
+            System.out.println("OK");
+            return true;
+        }
+        else {
+            System.out.println("<ERROR No moves to be NEXT>");
+            return false;
+        }
     }
 
     private static int[] getIntXY(String cmd) {
@@ -115,4 +146,3 @@ public class ChessLogic {
         return new int[]{x, y};
     }
 }
-

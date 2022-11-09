@@ -7,11 +7,11 @@ import com.sosnilosm.chess.pieces.Move;
  * @author Sergei Sosnilo
  */
 public class King extends AbstractPiece {
-    public King(Colour colour) {
+    public King(Colours colours) {
         super(
                 Types.King,
                 Integer.MAX_VALUE,
-                colour,
+                colours,
                 new Move[]{
                         new Move(1, 0), new Move(0, 1),
                         new Move(-1, 0), new Move(0, -1),
