@@ -10,7 +10,8 @@ import java.util.*;
 /**
  * @author Sergei Sosnilo
  */
-// TODO: add list of taken pieces in previous and next Pos
+// TODO: fix nextMove() when some piece is taken
+// TODO: add draw (if 'one king vs one king' or if 'one side has no possible moves')
 public class ChessBoard {
     private final AbstractPiece[][] board;
     private Piece.Colours currentTurn = Piece.Colours.White;
@@ -100,6 +101,11 @@ public class ChessBoard {
             board[previousMove.toY()][previousMove.toX()] = previousMove.toPiece();
             board[previousMove.fromY()][previousMove.fromX()] = previousMove.fromPiece();
 
+            allTakenPieces.remove(previousMove.toPiece());
+
+            System.out.println("UNDO from = " + previousMove.fromPiece().getType());
+            System.out.println("UNDO to = " + previousMove.toPiece().getType());
+
             return addPosInNextStk(previousMove.fromX(), previousMove.fromY(), previousMove.toX(), previousMove.toY(),
                     previousMove.fromPiece(), previousMove.toPiece());
         }
@@ -114,6 +120,13 @@ public class ChessBoard {
 
             board[nextMove.fromY()][nextMove.fromX()] = nextMove.toPiece();
             board[nextMove.toY()][nextMove.toX()] = nextMove.fromPiece();
+
+            if (nextMove.toPiece().getType() != Piece.Types.empty) {
+                allTakenPieces.add(nextMove.toPiece());
+            }
+
+            System.out.println("NEXT from = " + nextMove.fromPiece().getType());
+            System.out.println("NEXT to = " + nextMove.toPiece().getType());
 
             return addPosInPreviousStk(nextMove.fromX(), nextMove.fromY(), nextMove.toX(), nextMove.toY(),
                     nextMove.fromPiece(), nextMove.toPiece());
@@ -140,7 +153,7 @@ public class ChessBoard {
             AbstractPiece fromPieceStk = board[fromY][fromX];
             AbstractPiece toPieceStk = board[toY][toX];
 
-            if (!(board[toY][toX].getType() == Piece.Types.empty)) {
+            if (board[toY][toX].getType() != Piece.Types.empty) {
                 allTakenPieces.add(board[toY][toX]);
             }
 
@@ -408,9 +421,9 @@ public class ChessBoard {
     }
 
     public int getSuperiorityOfColour(Piece.Colours currentColour) {
-        currentColour = swapRealColour(currentColour);
         int whiteValue = 0;
         int blackValue = 0;
+
         for (AbstractPiece[] lineY : board) {
             for(AbstractPiece piece : lineY) {
                 if (piece.getColour() == Piece.Colours.White) {
@@ -420,6 +433,7 @@ public class ChessBoard {
                 }
             }
         }
+
         if (currentColour == Piece.Colours.White) {
             return (whiteValue - blackValue);
         }
@@ -427,6 +441,7 @@ public class ChessBoard {
             return  (blackValue - whiteValue);
         }
     }
+
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
