@@ -1,4 +1,6 @@
-package com.sosnilosm.chess;
+package com.sosnilosm;
+
+import com.sosnilosm.chess.ChessGame;
 
 /**
  * @author Sergei Sosnilo

@@ -12,8 +12,7 @@ public class ChessLogic {
     public void start() {
         Scanner sc = new Scanner(System.in);
         ChessBoard chessBoard = new ChessBoard();
-        System.out.println("White took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.White));
-        System.out.println("Black took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.Black));
+        System.out.println(getTakenPiecesInfo(chessBoard));
         System.out.println(chessBoard);
 
         int movesCounter = 0;
@@ -22,14 +21,7 @@ public class ChessLogic {
             String cmd = sc.nextLine();
 
             if (doMove(cmd, chessBoard)) {
-                System.out.println("White took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.White));
-                if (chessBoard.getSuperiorityOfColour(Piece.Colours.White) > 0) {
-                    System.out.print("+" + chessBoard.getSuperiorityOfColour(Piece.Colours.White));
-                }
-                System.out.println("Black took: " + chessBoard.getTakenPiecesTypesByColour(Piece.Colours.Black));
-                if (chessBoard.getSuperiorityOfColour(Piece.Colours.Black) > 0) {
-                    System.out.print("+" + chessBoard.getSuperiorityOfColour(Piece.Colours.Black));
-                }
+                System.out.println(getTakenPiecesInfo(chessBoard));
                 System.out.println(chessBoard);
                 movesCounter++;
             }
@@ -130,7 +122,7 @@ public class ChessLogic {
         }
     }
 
-    private static int[] getIntXY(String cmd) {
+    private int[] getIntXY(String cmd) {
         cmd = cmd.toLowerCase().split(" ")[0];
 
         char[] alphabet = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
@@ -144,5 +136,18 @@ public class ChessLogic {
         }
         int y = Character.getNumericValue(cmd.charAt(1)) - 1;
         return new int[]{x, y};
+    }
+
+    private String getTakenPiecesInfo(ChessBoard chessBoard) {
+        StringBuilder takenPiecesInfo = new StringBuilder();
+        takenPiecesInfo.append("White took: ").append(chessBoard.getTakenPiecesTypesByColour(Piece.Colours.White));
+        if (chessBoard.getSuperiorityOfColour(Piece.Colours.White) > 0) {
+            takenPiecesInfo.append("+").append(chessBoard.getSuperiorityOfColour(Piece.Colours.White));
+        }
+        takenPiecesInfo.append("\nBlack took: ").append(chessBoard.getTakenPiecesTypesByColour(Piece.Colours.Black));
+        if (chessBoard.getSuperiorityOfColour(Piece.Colours.Black) > 0) {
+            takenPiecesInfo.append("+").append(chessBoard.getSuperiorityOfColour(Piece.Colours.Black));
+        }
+        return takenPiecesInfo.toString();
     }
 }
