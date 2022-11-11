@@ -10,8 +10,7 @@ import java.util.*;
 /**
  * @author Sergei Sosnilo
  */
-// TODO: fix nextMove() when some piece is taken
-// TODO: add draw (if 'one king vs one king' or if 'one side has no possible moves')
+// TODO: fix nextMove() for roque and pawnSwap using PosStkData.MoveType
 public class ChessBoard {
     private final AbstractPiece[][] board;
     private Piece.Colours currentTurn = Piece.Colours.White;
@@ -94,6 +93,32 @@ public class ChessBoard {
         return true;
     }
 
+    private boolean addPosInPreviousStk(int fromX, int fromY, int toX, int toY,
+                                        AbstractPiece fromPiece, AbstractPiece toPiece) {
+        previousPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+        return swapTurn();
+    }
+
+    private boolean addPosInPreviousStk(int fromX, int fromY, int toX, int toY,
+                                        AbstractPiece fromPiece, AbstractPiece toPiece,
+                                        PosStkData.MoveType moveType) {
+        previousPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece, moveType));
+        return swapTurn();
+    }
+
+    private boolean addPosInNextStk(int fromX, int fromY, int toX, int toY,
+                                    AbstractPiece fromPiece, AbstractPiece toPiece) {
+        nextPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
+        return swapTurn();
+    }
+
+    private boolean addPosInNextStk(int fromX, int fromY, int toX, int toY,
+                                    AbstractPiece fromPiece, AbstractPiece toPiece,
+                                    PosStkData.MoveType moveType) {
+        nextPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece, moveType));
+        return swapTurn();
+    }
+
     public boolean previousPos() {
         if (!previousPosStk.empty()) {
             PosStkData previousMove = previousPosStk.pop();
@@ -102,9 +127,6 @@ public class ChessBoard {
             board[previousMove.fromY()][previousMove.fromX()] = previousMove.fromPiece();
 
             allTakenPieces.remove(previousMove.toPiece());
-
-            System.out.println("UNDO from = " + previousMove.fromPiece().getType());
-            System.out.println("UNDO to = " + previousMove.toPiece().getType());
 
             return addPosInNextStk(previousMove.fromX(), previousMove.fromY(), previousMove.toX(), previousMove.toY(),
                     previousMove.fromPiece(), previousMove.toPiece());
@@ -118,15 +140,17 @@ public class ChessBoard {
         if (!nextPosStk.empty()) {
             PosStkData nextMove = nextPosStk.pop();
 
-            board[nextMove.fromY()][nextMove.fromX()] = nextMove.toPiece();
-            board[nextMove.toY()][nextMove.toX()] = nextMove.fromPiece();
-
             if (nextMove.toPiece().getType() != Piece.Types.empty) {
                 allTakenPieces.add(nextMove.toPiece());
+                if (nextMove.fromPiece().getColour() != nextMove.toPiece().getColour()) {
+                    board[nextMove.fromY()][nextMove.fromX()] = new EmptyCell();
+                }
+            }
+            else {
+                board[nextMove.fromY()][nextMove.fromX()] = nextMove.toPiece();
             }
 
-            System.out.println("NEXT from = " + nextMove.fromPiece().getType());
-            System.out.println("NEXT to = " + nextMove.toPiece().getType());
+            board[nextMove.toY()][nextMove.toX()] = nextMove.fromPiece();
 
             return addPosInPreviousStk(nextMove.fromX(), nextMove.fromY(), nextMove.toX(), nextMove.toY(),
                     nextMove.fromPiece(), nextMove.toPiece());
@@ -134,18 +158,6 @@ public class ChessBoard {
         else {
             return false;
         }
-    }
-
-    private boolean addPosInPreviousStk(int fromX, int fromY, int toX, int toY,
-                                        AbstractPiece fromPiece, AbstractPiece toPiece) {
-        previousPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
-        return swapTurn();
-    }
-
-    private boolean addPosInNextStk(int fromX, int fromY, int toX, int toY,
-                                    AbstractPiece fromPiece, AbstractPiece toPiece) {
-        nextPosStk.push(new PosStkData(fromX, fromY, toX, toY, fromPiece, toPiece));
-        return swapTurn();
     }
 
     public boolean doMove(int fromX, int fromY, int toX, int toY) {
@@ -218,7 +230,7 @@ public class ChessBoard {
         board[toY][toX - 2].doMove();
 
         nextPosStk.clear();
-        return swapTurn();
+        return addPosInPreviousStk(fromX, fromY, toX, toY, king, rook, PosStkData.MoveType.ShortRoque);
     }
 
     private boolean longRoque(int fromX, int fromY, int toX, int toY) {
@@ -235,7 +247,7 @@ public class ChessBoard {
         board[toY][toX + 3].doMove();
 
         nextPosStk.clear();
-        return swapTurn();
+        return addPosInPreviousStk(fromX, fromY, toX, toY, king, rook, PosStkData.MoveType.LongRoque);
     }
 
     // TODO: refactor and delete sout n sin
@@ -407,6 +419,11 @@ public class ChessBoard {
         return true;
     }
 
+    public boolean isDraw() {
+        return (allTakenPieces.size() == 30
+                || getAllLegalMovesAgainstColour(swapRealColour(getCurrentTurn())).isEmpty());
+    }
+
     public List<Piece.Types> getTakenPiecesTypesByColour(Piece.Colours currentColour) {
         List<Piece.Types> takenPiecesFromColour = new ArrayList<>();
         currentColour = swapRealColour(currentColour);
@@ -447,7 +464,7 @@ public class ChessBoard {
         StringBuilder res = new StringBuilder();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                res.append(this.board[i][j].getType()).append("([x,y][").append(j).append(",").append(i).append("] ");
+                res.append(this.board[i][j].getType()).append(this.board[i][j].getColour()).append("([x,y][").append(j).append(",").append(i).append("] ");
             }
             res.append("\n");
         }

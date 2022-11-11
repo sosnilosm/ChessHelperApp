@@ -16,7 +16,7 @@ public class ChessLogic {
         System.out.println(chessBoard);
 
         int movesCounter = 0;
-        while (!chessBoard.isKingOnCheckmate(chessBoard.getCurrentTurn())) {
+        while (!chessBoard.isKingOnCheckmate(chessBoard.getCurrentTurn()) && !chessBoard.isDraw()) {
             System.out.print("Enter command(" + chessBoard.getCurrentTurn() +"): ");
             String cmd = sc.nextLine();
 
@@ -30,11 +30,16 @@ public class ChessLogic {
                 System.out.println("CHECK");
             }
         }
-        System.out.println("CHECKMATE!");
-        if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
-            System.out.println("BLACK WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
-        } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
-            System.out.println("WHITE WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
+        if (chessBoard.isKingOnCheckmate(chessBoard.getCurrentTurn())) {
+            System.out.println("CHECKMATE!");
+            if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
+                System.out.println("BLACK WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
+            } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
+                System.out.println("WHITE WON in " + ((movesCounter / 2) + 1) + " moves!!! End of the game.");
+            }
+        }
+        else if (chessBoard.isDraw()) {
+            System.out.println("PATE");
         }
     }
 
@@ -76,6 +81,7 @@ public class ChessLogic {
 
     private boolean shortRoque(String cmd, ChessBoard chessBoard) {
         if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
+            System.out.println("OK " + cmd);
             return chessBoard.doRoque(4, 0, 7, 0);
         } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
             System.out.println("OK " + cmd);
@@ -89,6 +95,7 @@ public class ChessLogic {
 
     private boolean longRoque(String cmd, ChessBoard chessBoard) {
         if (chessBoard.getCurrentTurn() == Piece.Colours.White) {
+            System.out.println("OK " + cmd);
             return chessBoard.doRoque(4, 0, 0, 0);
         } else if (chessBoard.getCurrentTurn() == Piece.Colours.Black) {
             System.out.println("OK " + cmd);

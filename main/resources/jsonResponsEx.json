@@ -1,0 +1,16 @@
+{
+    "isCheck": false,
+    "isCheckmate": false,
+    "isDraw": false,
+    "isMoveDoneSuccessfully": false,
+    "PieceType": "Pawn",
+    "isTake": false,
+    "moveFrom": {
+        "x": 4,
+        "y": 1
+    },
+    "moveTo": {
+        "x": 4,
+        "y": 3
+    }
+}
