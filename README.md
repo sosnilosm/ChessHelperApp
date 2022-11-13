@@ -1,4 +1,4 @@
-## Chess Helper Web App Beta ver. 0.1
+## Chess Helper WebApp Beta ver. 0.1
 This is a project designed to help beginners in chess not make completely banal mistakes. Such as losing or missing checkmate in one move, losing valuable pieces, and so on.
 
 ---
