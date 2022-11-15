@@ -2,6 +2,8 @@
 This is a project designed to help beginners in chess not make completely banal mistakes. Such as losing or missing checkmate in one move, losing valuable pieces, and so on.
 
 ---
+## Beta ver. 0.1
+Current version provides console control of Chess game
 
 ## About 
 
